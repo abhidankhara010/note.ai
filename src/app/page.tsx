@@ -156,6 +156,7 @@ export default function Home() {
 
   const sortedAndFilteredNotes = useMemo(() => {
     const filtered = notes.filter(note => {
+      if (!note.content) return false;
       const currentContent = note.content[language];
       if (!currentContent) return false;
 
