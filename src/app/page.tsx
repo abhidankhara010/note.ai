@@ -19,7 +19,7 @@ const initialNotes: Note[] = [
         body: 'આ ગુજરાતીમાં મારી પ્રથમ નોંધ છે. હું મારી નોટ-ટેકીંગ એપ્લિકેશન બનાવવા માટે ઉત્સાહિત છું. આ એક ખૂબ જ સુંદર અને ઉપયોગી એપ્લિકેશન બનશે.',
       },
     },
-    color: '#B2E4A8', // Light Green
+    color: '#D3F4E2', // Mint Green
     isPinned: true,
     createdAt: new Date('2023-10-26T10:00:00Z'),
     updatedAt: new Date('2023-10-26T10:00:00Z'),
@@ -36,7 +36,7 @@ const initialNotes: Note[] = [
         body: '- Milk\n- Bread\n- Eggs\n- Vegetables\n- Fruits',
       }
     },
-    color: '#A8B778', // Soft Olive
+    color: '#FFF6D1', // Soft Yellow
     isPinned: false,
     createdAt: new Date('2023-10-25T15:30:00Z'),
     updatedAt: new Date('2023-10-25T15:30:00Z'),
@@ -53,7 +53,7 @@ const initialNotes: Note[] = [
         body: 'एआई सुविधाओं के लिए जेमिनी एपीआई का उपयोग करें। उपयोगकर्ता नोट्स को सारांशित करने के लिए एक फ़ंक्शन बनाएं। ग्रिड और सूची दृश्य के लिए एक टॉगल जोड़ें। डार्क मोड भी जोड़ें।',
       }
     },
-    color: '#F0F8F0', // Very light green
+    color: '#FADADD', // Soft Pink
     isPinned: false,
     createdAt: new Date('2023-10-24T09:00:00Z'),
     updatedAt: new Date('2023-10-24T09:00:00Z'),

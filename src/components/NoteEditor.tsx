@@ -32,7 +32,7 @@ interface NoteEditorProps {
   currentLanguage: Language;
 }
 
-const colorPalette = ['#F0F8F0', '#B2E4A8', '#A8B778', '#F3E5AB', '#FFDDC1', '#FFC0CB', '#C1D1FF', '#B2F7E8'];
+const colorPalette = ['#FFFFFF', '#FADADD', '#D3F4E2', '#FFF6D1', '#E3F2FD', '#FFE0B2', '#E1BEE7', '#FFCDD2'];
 
 export function NoteEditor({ isOpen, onOpenChange, note, onSave, currentLanguage }: NoteEditorProps) {
   const { toast } = useToast();
@@ -168,7 +168,7 @@ export function NoteEditor({ isOpen, onOpenChange, note, onSave, currentLanguage
                        style={{ backgroundColor: color, borderColor: field.value === color ? 'hsl(var(--primary))' : 'transparent' }}
                        onClick={() => field.onChange(color)}
                      >
-                       {field.value === color && <Check className="h-5 w-5 mx-auto my-auto text-primary-foreground" style={{color: color === '#F0F8F0' ? 'black' : 'white'}} />}
+                       {field.value === color && <Check className="h-5 w-5 mx-auto my-auto text-primary-foreground" style={{color: '#222222'}} />}
                        <span className="sr-only">{color}</span>
                      </button>
                    ))}

@@ -89,24 +89,24 @@ export function NoteCard({ note, onEdit, onDelete, onTogglePin, onUpdateNote, vi
   const cardStyle = { backgroundColor: note.color };
   
   const getTextColor = (bgColor: string) => {
-    if (!bgColor || bgColor.length < 7) return 'black';
+    if (!bgColor || bgColor.length < 7) return 'text-slate-800';
     const color = (bgColor.charAt(0) === '#') ? bgColor.substring(1, 7) : bgColor;
     const r = parseInt(color.substring(0, 2), 16);
     const g = parseInt(color.substring(2, 4), 16);
     const b = parseInt(color.substring(4, 6), 16);
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    return luminance > 0.6 ? 'black' : 'white';
+    return luminance > 0.65 ? 'text-slate-800' : 'text-white';
   };
 
-  const textColorClass = getTextColor(note.color) === 'black' ? 'text-slate-800' : 'text-white';
-  const mutedTextColorClass = getTextColor(note.color) === 'black' ? 'text-slate-600' : 'text-slate-200';
-  const iconColorClass = getTextColor(note.color) === 'black' ? 'text-slate-700 hover:text-slate-900' : 'text-slate-100 hover:text-white';
+  const textColorClass = getTextColor(note.color);
+  const mutedTextColorClass = textColorClass === 'text-white' ? 'text-slate-200' : 'text-slate-600';
+  const iconColorClass = textColorClass === 'text-white' ? 'text-slate-100 hover:text-white' : 'text-slate-700 hover:text-slate-900';
 
   const languages: Language[] = ['gu', 'hi', 'en'];
 
   return (
     <>
-      <Card className={cn("flex flex-col h-full transition-shadow duration-300 hover:shadow-xl", textColorClass)} style={cardStyle}>
+      <Card className={cn("flex flex-col h-full transition-shadow duration-300 hover:shadow-xl border-0", textColorClass)} style={cardStyle}>
         <CardHeader className="relative pb-2">
           <CardTitle className="font-headline pr-8">{noteContent.title}</CardTitle>
           <button
