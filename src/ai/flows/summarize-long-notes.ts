@@ -39,7 +39,7 @@ const summarizeNoteFlow = ai.defineFlow(
     outputSchema: SummarizeNoteOutputSchema,
   },
   async input => {
-    const {output} = await summarizeNotePrompt(input);
+    const {output} = await summarizeNotePrompt(input, { model: 'googleai/gemini-2.0-flash' });
     return output!;
   }
 );
