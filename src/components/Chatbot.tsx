@@ -7,12 +7,23 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { chat, type ChatInput, type ChatOutput } from '@/ai/flows/chatbot-flow';
+import { chat } from '@/ai/flows/chatbot-flow';
+import type { z } from 'zod';
 
+// Types needed for the chat flow, defined here to avoid "use server" export issues.
 type ChatMessage = {
   role: 'user' | 'model';
   text: string;
 };
+
+type ChatInput = {
+  history: ChatMessage[];
+};
+
+type ChatOutput = {
+  response: string;
+};
+
 
 export function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -62,15 +73,7 @@ export function Chatbot() {
 
   return (
     <>
-      <div className="fixed bottom-28 right-6 z-40 sm:bottom-28 sm:right-8">
-        <Button
-          onClick={() => setIsOpen(!isOpen)}
-          className="rounded-full h-14 w-14 sm:h-16 sm:w-16 shadow-lg hover:scale-105 transition-transform flex items-center justify-center bg-accent hover:bg-accent/90"
-        >
-          {isOpen ? <X className="h-7 w-7 sm:h-8 sm:w-8" /> : <Bot className="h-7 w-7 sm:h-8 sm:w-8" />}
-          <span className="sr-only">Toggle Chatbot</span>
-        </Button>
-      </div>
+      {/* The chatbot toggle button has been removed as per the user request */}
 
       {isOpen && (
         <div className="fixed bottom-48 right-6 sm:right-8 z-40 w-[calc(100vw-3rem)] max-w-sm h-[60vh] max-h-[500px] bg-card border rounded-lg shadow-xl flex flex-col transition-all duration-300 ease-in-out">
