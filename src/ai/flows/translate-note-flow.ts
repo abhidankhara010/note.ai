@@ -59,7 +59,7 @@ const translateNoteFlow = ai.defineFlow(
   },
   async (input) => {
     const targetLanguageName = languageToName[input.targetLanguage] || input.targetLanguage;
-    const {output} = await translateNotePrompt({...input, targetLanguageName});
+    const {output} = await translateNotePrompt({...input, targetLanguageName}, { model: 'googleai/gemini-2.0-flash' });
     return output!;
   }
 );
