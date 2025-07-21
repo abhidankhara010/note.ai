@@ -24,30 +24,9 @@ interface NoteCardProps {
 
 export function NoteCard({ note, onEdit, onDelete, onTogglePin, onUpdateNote, viewMode, currentLanguage }: NoteCardProps) {
   const { toast } = useToast();
-  const [isSummarizing, setIsSummarizing] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
-  const [summary, setSummary] = useState('');
   
   const noteContent = note.content[currentLanguage] ?? { title: 'Untitled', body: '' };
-
-  const handleSummarize = async () => {
-    if (!noteContent.body) return;
-    setIsSummarizing(true);
-    setSummary('');
-    try {
-      const result = await summarizeNote({ note: noteContent.body });
-      setSummary(result.summary);
-    } catch (error) {
-      console.error('Summarization failed:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Summarization Failed',
-        description: 'Could not generate a summary for this note.',
-      });
-    } finally {
-      setIsSummarizing(false);
-    }
-  };
 
   const handleTranslate = async (targetLang: Language) => {
     if (note.content[targetLang]) return; // Already translated
@@ -157,18 +136,6 @@ export function NoteCard({ note, onEdit, onDelete, onTogglePin, onUpdateNote, vi
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              className={iconColorClass}
-              onClick={handleSummarize}
-              disabled={isSummarizing || noteContent.body.length < 50}
-              title={noteContent.body.length < 50 ? 'Note too short to summarize' : 'Summarize note'}
-            >
-              {isSummarizing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-              <span className="sr-only">Summarize</span>
-            </Button>
-            
              <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="ghost" size="icon" className={cn("hover:text-destructive", iconColorClass)}>
@@ -192,20 +159,6 @@ export function NoteCard({ note, onEdit, onDelete, onTogglePin, onUpdateNote, vi
           </div>
         </CardFooter>
       </Card>
-      
-      <AlertDialog open={!!summary} onOpenChange={(open) => !open && setSummary('')}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>AI Summary</AlertDialogTitle>
-            <AlertDialogDescription>
-              {summary}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setSummary('')}>Close</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }
