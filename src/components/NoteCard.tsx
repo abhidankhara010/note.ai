@@ -138,30 +138,6 @@ export function NoteCard({ note, onEdit, onDelete, onTogglePin, onUpdateNote, on
               <span className="sr-only">Summarize</span>
             </Button>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={iconColorClass}
-                  disabled={isTranslating}
-                >
-                  {isTranslating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Languages className="h-4 w-4" />}
-                  <span className="sr-only">Translate</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                {languages.filter(lang => lang !== currentLanguage && !note.content[lang]).map(lang => (
-                  <DropdownMenuItem key={lang} onClick={() => handleTranslate(lang)}>
-                    Translate to {lang === 'gu' ? 'Gujarati' : lang === 'hi' ? 'Hindi' : 'English'}
-                  </DropdownMenuItem>
-                ))}
-                 {languages.filter(lang => lang !== currentLanguage && !note.content[lang]).length === 0 && (
-                   <DropdownMenuItem disabled>Already Translated</DropdownMenuItem>
-                 )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
              <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="ghost" size="icon" className={cn("hover:text-destructive", iconColorClass)}>
