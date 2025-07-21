@@ -36,7 +36,11 @@ export async function translateNote(input: TranslateNoteInput): Promise<Translat
 
 const translateNotePrompt = ai.definePrompt({
   name: 'translateNotePrompt',
-  input: {schema: TranslateNoteInputSchema},
+  input: {schema: z.object({
+    title: z.string(),
+    body: z.string(),
+    targetLanguageName: z.string(),
+  })},
   output: {schema: TranslateNoteOutputSchema},
   prompt: `Translate the following note title and body into {{targetLanguageName}}.
 
