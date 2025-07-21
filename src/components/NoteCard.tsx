@@ -127,17 +127,6 @@ export function NoteCard({ note, onEdit, onDelete, onTogglePin, onUpdateNote, on
               <span className="sr-only">Edit</span>
             </Button>
             
-            <Button
-              variant="ghost"
-              size="icon"
-              className={iconColorClass}
-              onClick={onSummarize}
-              disabled={isSummarizing}
-            >
-              {isSummarizing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-              <span className="sr-only">Summarize</span>
-            </Button>
-
              <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="ghost" size="icon" className={cn("hover:text-destructive", iconColorClass)}>
