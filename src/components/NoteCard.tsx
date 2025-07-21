@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from 'react';
-import { Pin, PinOff, Pencil, Trash2, Sparkles, Loader2, Languages, Copy, Share2, Download } from 'lucide-react';
-import type { Note, Language, NoteContent } from '@/lib/types';
+import { Pin, PinOff, Pencil, Trash2, Languages, Loader2 } from 'lucide-react';
+import type { Note, Language } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { summarizeNote } from '@/ai/flows/summarize-long-notes';
 import { translateNote } from '@/ai/flows/translate-note-flow';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -99,7 +98,7 @@ export function NoteCard({ note, onEdit, onDelete, onTogglePin, onUpdateNote, vi
         <CardContent className="flex-grow">
           <p className={cn(
             "whitespace-pre-wrap text-sm",
-            viewMode === 'grid' ? 'line-clamp-6' : 'line-clamp-none'
+            viewMode === 'grid' ? 'line-clamp-6' : ''
             )}>{noteContent.body}</p>
         </CardContent>
         <CardFooter className="flex justify-between items-center">

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo, useEffect } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import type { Note, Language } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -190,28 +189,18 @@ export default function Home() {
               ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
               : "flex flex-col gap-4 max-w-4xl mx-auto"
           )}>
-            <AnimatePresence>
-              {sortedAndFilteredNotes.map(note => (
-                <motion.div
-                  key={note.id}
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <NoteCard
-                    note={note}
-                    onEdit={handleEditNote}
-                    onDelete={handleDeleteNote}
-                    onTogglePin={handleTogglePin}
-                    onUpdateNote={handleUpdateNote}
-                    viewMode={viewMode}
-                    currentLanguage={language}
-                  />
-                </motion.div>
-              ))}
-            </AnimatePresence>
+            {sortedAndFilteredNotes.map(note => (
+              <NoteCard
+                key={note.id}
+                note={note}
+                onEdit={handleEditNote}
+                onDelete={handleDeleteNote}
+                onTogglePin={handleTogglePin}
+                onUpdateNote={handleUpdateNote}
+                viewMode={viewMode}
+                currentLanguage={language}
+              />
+            ))}
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center text-center text-muted-foreground mt-24 space-y-4">
@@ -233,9 +222,9 @@ export default function Home() {
         currentLanguage={language}
       />
 
-      <div className="fixed bottom-8 right-8 z-20">
-         <Button onClick={handleCreateNewNote} className="rounded-full h-16 w-16 shadow-lg hover:scale-105 transition-transform">
-           <Plus className="h-8 w-8" />
+      <div className="fixed bottom-6 right-6 z-20 sm:bottom-8 sm:right-8">
+         <Button onClick={handleCreateNewNote} className="rounded-full h-14 w-14 sm:h-16 sm:w-16 shadow-lg hover:scale-105 transition-transform flex items-center justify-center">
+           <Plus className="h-7 w-7 sm:h-8 sm:w-8" />
            <span className="sr-only">Create New Note</span>
          </Button>
       </div>
