@@ -1,13 +1,17 @@
 "use client";
 
 import { useState, useMemo, useEffect } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Sparkles } from 'lucide-react';
 import type { Note, Language } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { AppHeader } from '@/components/AppHeader';
 import { NoteCard } from '@/components/NoteCard';
 import { NoteEditor } from '@/components/NoteEditor';
+import { Chatbot } from '@/components/Chatbot';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { summarizeNote } from '@/ai/flows/summarize-long-notes';
+
 
 const initialNotes: Note[] = [
   {
@@ -67,6 +71,8 @@ export default function Home() {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [language, setLanguage] = useState<Language>('gu');
+  const { toast } = useToast();
+  const [isSummarizing, setIsSummarizing] = useState(false);
 
   useEffect(() => {
     const savedNotes = localStorage.getItem('notes');
@@ -153,6 +159,36 @@ export default function Home() {
     setNotes(notes.map(note => note.id === id ? { ...note, isPinned: !note.isPinned } : note));
   };
 
+  const handleSummarize = async (note: Note) => {
+    const noteContent = note.content[language];
+    if (!noteContent || !noteContent.body) {
+      toast({
+        variant: 'destructive',
+        title: 'Summarization Failed',
+        description: 'Note is empty.',
+      });
+      return;
+    }
+    setIsSummarizing(true);
+    try {
+      const { summary } = await summarizeNote({ note: noteContent.body });
+      toast({
+        title: "✨ Note Summary",
+        description: summary,
+        duration: 9000,
+      });
+    } catch (error) {
+      console.error('Summarization failed:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Summarization Failed',
+        description: 'Could not summarize this note.',
+      });
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
+
   const sortedAndFilteredNotes = useMemo(() => {
     const filtered = notes.filter(note => {
       if (!note.content) return false;
@@ -197,6 +233,8 @@ export default function Home() {
                 onDelete={handleDeleteNote}
                 onTogglePin={handleTogglePin}
                 onUpdateNote={handleUpdateNote}
+                onSummarize={() => handleSummarize(note)}
+                isSummarizing={isSummarizing}
                 viewMode={viewMode}
                 currentLanguage={language}
               />
@@ -222,6 +260,8 @@ export default function Home() {
         currentLanguage={language}
       />
 
+      <Chatbot />
+      
       <div className="fixed bottom-6 right-6 z-20 sm:bottom-8 sm:right-8">
          <Button onClick={handleCreateNewNote} className="rounded-full h-14 w-14 sm:h-16 sm:w-16 shadow-lg hover:scale-105 transition-transform flex items-center justify-center">
            <Plus className="h-7 w-7 sm:h-8 sm:w-8" />

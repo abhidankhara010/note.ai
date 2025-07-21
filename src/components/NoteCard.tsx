@@ -5,7 +5,6 @@ import { Pin, PinOff, Pencil, Trash2, Languages, Loader2, Sparkles } from 'lucid
 import type { Note, Language } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { translateNote } from '@/ai/flows/translate-note-flow';
-import { summarizeNote } from '@/ai/flows/summarize-long-notes';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -18,14 +17,15 @@ interface NoteCardProps {
   onDelete: (id: string) => void;
   onTogglePin: (id: string) => void;
   onUpdateNote: (note: Note) => void;
+  onSummarize: () => void;
+  isSummarizing: boolean;
   viewMode: 'grid' | 'list';
   currentLanguage: Language;
 }
 
-export function NoteCard({ note, onEdit, onDelete, onTogglePin, onUpdateNote, viewMode, currentLanguage }: NoteCardProps) {
+export function NoteCard({ note, onEdit, onDelete, onTogglePin, onUpdateNote, onSummarize, isSummarizing, viewMode, currentLanguage }: NoteCardProps) {
   const { toast } = useToast();
   const [isTranslating, setIsTranslating] = useState(false);
-  const [isSummarizing, setIsSummarizing] = useState(false);
   
   const noteContent = note.content?.[currentLanguage] ?? { title: 'Untitled', body: '' };
   
@@ -58,7 +58,7 @@ export function NoteCard({ note, onEdit, onDelete, onTogglePin, onUpdateNote, vi
       onUpdateNote(updatedNote);
       toast({
         title: 'Note Translated',
-        description: `Successfully translated to ${targetLang}.`,
+        description: `Successfully translated to ${targetLang === 'gu' ? 'Gujarati' : targetLang === 'hi' ? 'Hindi' : 'English'}.`,
       });
     } catch (error) {
       console.error('Translation failed:', error);
@@ -72,32 +72,19 @@ export function NoteCard({ note, onEdit, onDelete, onTogglePin, onUpdateNote, vi
     }
   };
 
-  const handleSummarize = async () => {
-    setIsSummarizing(true);
-    try {
-      const { summary } = await summarizeNote({ note: noteContent.body });
-      toast({
-        title: "✨ Note Summary",
-        description: summary,
-        duration: 9000,
-      });
-    } catch (error) {
-      console.error('Summarization failed:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Summarization Failed',
-        description: 'Could not summarize this note.',
-      });
-    } finally {
-      setIsSummarizing(false);
-    }
-  };
-
   const cardStyle = { backgroundColor: note.color };
   
-  const getTextColor = (bgColor: string) => {
+  const getTextColor = (bgColor?: string) => {
     if (!bgColor || bgColor.length < 7) return 'text-slate-800';
     const color = (bgColor.charAt(0) === '#') ? bgColor.substring(1, 7) : bgColor;
+    // Handle short hex codes
+    if (color.length === 3) {
+      const r = parseInt(color.substring(0, 1).repeat(2), 16);
+      const g = parseInt(color.substring(1, 2).repeat(2), 16);
+      const b = parseInt(color.substring(2, 3).repeat(2), 16);
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      return luminance > 0.65 ? 'text-slate-800' : 'text-white';
+    }
     const r = parseInt(color.substring(0, 2), 16);
     const g = parseInt(color.substring(2, 4), 16);
     const b = parseInt(color.substring(4, 6), 16);
@@ -144,7 +131,7 @@ export function NoteCard({ note, onEdit, onDelete, onTogglePin, onUpdateNote, vi
               variant="ghost"
               size="icon"
               className={iconColorClass}
-              onClick={handleSummarize}
+              onClick={onSummarize}
               disabled={isSummarizing}
             >
               {isSummarizing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
