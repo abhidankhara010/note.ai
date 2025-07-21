@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from 'react';
-import { Pin, PinOff, Pencil, Trash2, Languages, Loader2 } from 'lucide-react';
+import { Pin, PinOff, Pencil, Trash2, Languages, Loader2, Sparkles } from 'lucide-react';
 import type { Note, Language } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { translateNote } from '@/ai/flows/translate-note-flow';
+import { summarizeNote } from '@/ai/flows/summarize-long-notes';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -24,8 +25,15 @@ interface NoteCardProps {
 export function NoteCard({ note, onEdit, onDelete, onTogglePin, onUpdateNote, viewMode, currentLanguage }: NoteCardProps) {
   const { toast } = useToast();
   const [isTranslating, setIsTranslating] = useState(false);
+  const [isSummarizing, setIsSummarizing] = useState(false);
   
-  const noteContent = note.content[currentLanguage] ?? { title: 'Untitled', body: '' };
+  const noteContent = note.content?.[currentLanguage] ?? { title: 'Untitled', body: '' };
+  
+  if (!note.content || !noteContent) {
+    // This can happen if a note is created but has no content for the current language.
+    // We could render a placeholder or nothing at all.
+    return null;
+  }
 
   const handleTranslate = async (targetLang: Language) => {
     if (note.content[targetLang]) return; // Already translated
@@ -61,6 +69,27 @@ export function NoteCard({ note, onEdit, onDelete, onTogglePin, onUpdateNote, vi
       });
     } finally {
       setIsTranslating(false);
+    }
+  };
+
+  const handleSummarize = async () => {
+    setIsSummarizing(true);
+    try {
+      const { summary } = await summarizeNote({ note: noteContent.body });
+      toast({
+        title: "✨ Note Summary",
+        description: summary,
+        duration: 9000,
+      });
+    } catch (error) {
+      console.error('Summarization failed:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Summarization Failed',
+        description: 'Could not summarize this note.',
+      });
+    } finally {
+      setIsSummarizing(false);
     }
   };
 
@@ -111,6 +140,17 @@ export function NoteCard({ note, onEdit, onDelete, onTogglePin, onUpdateNote, vi
               <span className="sr-only">Edit</span>
             </Button>
             
+            <Button
+              variant="ghost"
+              size="icon"
+              className={iconColorClass}
+              onClick={handleSummarize}
+              disabled={isSummarizing}
+            >
+              {isSummarizing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              <span className="sr-only">Summarize</span>
+            </Button>
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
