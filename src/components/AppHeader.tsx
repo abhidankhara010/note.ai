@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { cn } from '@/lib/utils';
-import { Language } from '@/lib/types';
+import type { Language } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface AppHeaderProps {
@@ -14,8 +14,6 @@ interface AppHeaderProps {
   onCreateNew: () => void;
   viewMode: 'grid' | 'list';
   onViewModeChange: (mode: 'grid' | 'list') => void;
-  language: Language;
-  onLanguageChange: (language: Language) => void;
 }
 
 export function AppHeader({ 
@@ -23,9 +21,7 @@ export function AppHeader({
   setSearchQuery, 
   onCreateNew, 
   viewMode, 
-  onViewModeChange,
-  language,
-  onLanguageChange
+  onViewModeChange
 }: AppHeaderProps) {
   return (
     <header className="sticky top-0 z-30 w-full bg-background/80 backdrop-blur-sm border-b">
@@ -53,16 +49,6 @@ export function AppHeader({
           <div className="sm:hidden">
              <ThemeToggle />
           </div>
-          <Select value={language} onValueChange={(value: Language) => onLanguageChange(value)}>
-            <SelectTrigger className="w-auto sm:w-[120px] text-xs sm:text-sm">
-              <SelectValue placeholder="Language" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="gu">Gujarati</SelectItem>
-              <SelectItem value="hi">Hindi</SelectItem>
-              <SelectItem value="en">English</SelectItem>
-            </SelectContent>
-          </Select>
 
           <div className="hidden sm:flex items-center gap-1 bg-muted p-1 rounded-lg">
             <Button

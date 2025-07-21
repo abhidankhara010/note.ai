@@ -214,8 +214,6 @@ export default function Home() {
         onCreateNew={handleCreateNewNote}
         viewMode={viewMode}
         onViewModeChange={handleViewModeChange}
-        language={language}
-        onLanguageChange={handleLanguageChange}
       />
       <main className="flex-grow p-4 sm:p-6 md:p-8">
         {sortedAndFilteredNotes.length > 0 ? (
