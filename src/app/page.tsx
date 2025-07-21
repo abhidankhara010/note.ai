@@ -3,19 +3,22 @@
 import { useState, useMemo, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
-import type { Note } from '@/lib/types';
+import type { Note, Language } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { AppHeader } from '@/components/AppHeader';
 import { NoteCard } from '@/components/NoteCard';
 import { NoteEditor } from '@/components/NoteEditor';
 import { Button } from '@/components/ui/button';
 
-// Mock data to simulate fetching from a database
 const initialNotes: Note[] = [
   {
     id: '1',
-    title: 'મારો પહેલો વિચાર',
-    body: 'આ ગુજરાતીમાં મારી પ્રથમ નોંધ છે. હું મારી નોટ-ટેકીંગ એપ્લિકેશન બનાવવા માટે ઉત્સાહિત છું. આ એક ખૂબ જ સુંદર અને ઉપયોગી એપ્લિકેશન બનશે.',
+    content: {
+      gu: {
+        title: 'મારો પહેલો વિચાર',
+        body: 'આ ગુજરાતીમાં મારી પ્રથમ નોંધ છે. હું મારી નોટ-ટેકીંગ એપ્લિકેશન બનાવવા માટે ઉત્સાહિત છું. આ એક ખૂબ જ સુંદર અને ઉપયોગી એપ્લિકેશન બનશે.',
+      },
+    },
     color: '#B2E4A8', // Light Green
     isPinned: true,
     createdAt: new Date('2023-10-26T10:00:00Z'),
@@ -23,8 +26,16 @@ const initialNotes: Note[] = [
   },
   {
     id: '2',
-    title: 'ખરીદીની યાદી',
-    body: '- દૂધ\n- બ્રેડ\n- ઈંડા\n- શાકભાજી\n- ફળો',
+    content: {
+      gu: {
+        title: 'ખરીદીની યાદી',
+        body: '- દૂધ\n- બ્રેડ\n- ઈંડા\n- શાકભાજી\n- ફળો',
+      },
+      en: {
+        title: 'Shopping List',
+        body: '- Milk\n- Bread\n- Eggs\n- Vegetables\n- Fruits',
+      }
+    },
     color: '#A8B778', // Soft Olive
     isPinned: false,
     createdAt: new Date('2023-10-25T15:30:00Z'),
@@ -32,8 +43,16 @@ const initialNotes: Note[] = [
   },
   {
     id: '3',
-    title: 'પ્રોજેક્ટ માટેના વિચારો',
-    body: 'AI સુવિધા માટે જેમિની API નો ઉપયોગ કરો. વપરાશકર્તાની નોંધોના સારાંશ માટે એક ફંક્શન બનાવો. ગ્રીડ અને લિસ્ટ વ્યુ માટે ટોગલ ઉમેરો. ડાર્ક મોડ પણ ઉમેરો.',
+    content: {
+      en: {
+        title: 'Project Ideas',
+        body: 'Use Gemini API for AI features. Create a function to summarize user notes. Add a toggle for grid and list view. Also add a dark mode.',
+      },
+      hi: {
+        title: 'परियोजना के विचार',
+        body: 'एआई सुविधाओं के लिए जेमिनी एपीआई का उपयोग करें। उपयोगकर्ता नोट्स को सारांशित करने के लिए एक फ़ंक्शन बनाएं। ग्रिड और सूची दृश्य के लिए एक टॉगल जोड़ें। डार्क मोड भी जोड़ें।',
+      }
+    },
     color: '#F0F8F0', // Very light green
     isPinned: false,
     createdAt: new Date('2023-10-24T09:00:00Z'),
@@ -48,6 +67,7 @@ export default function Home() {
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [language, setLanguage] = useState<Language>('gu');
 
   useEffect(() => {
     const savedNotes = localStorage.getItem('notes');
@@ -64,6 +84,10 @@ export default function Home() {
     if (savedViewMode) {
       setViewMode(savedViewMode);
     }
+    const savedLanguage = localStorage.getItem('language') as Language | null;
+    if (savedLanguage) {
+      setLanguage(savedLanguage);
+    }
   }, []);
   
   useEffect(() => {
@@ -71,6 +95,11 @@ export default function Home() {
       localStorage.setItem('notes', JSON.stringify(notes));
     }
   }, [notes]);
+
+  const handleLanguageChange = (lang: Language) => {
+    setLanguage(lang);
+    localStorage.setItem('language', lang);
+  }
 
   const handleViewModeChange = (mode: 'grid' | 'list') => {
     setViewMode(mode);
@@ -91,13 +120,23 @@ export default function Home() {
     setNotes(notes.filter(note => note.id !== id));
   };
 
-  const handleSaveNote = (noteToSave: Omit<Note, 'createdAt' | 'updatedAt' | 'id'> & { id?: string }) => {
-    if (noteToSave.id) {
-      setNotes(notes.map(n => n.id === noteToSave.id ? { ...n, ...noteToSave, updatedAt: new Date() } : n));
+  const handleSaveNote = (noteToSave: Omit<Note, 'createdAt' | 'updatedAt' | 'id' | 'content'> & { id?: string; title: string; body: string; }) => {
+    const { id, title, body, ...rest } = noteToSave;
+    const noteContent = { title, body };
+
+    if (id) {
+      setNotes(notes.map(n => {
+        if (n.id === id) {
+          const newContent = { ...n.content, [language]: noteContent };
+          return { ...n, ...rest, content: newContent, updatedAt: new Date() };
+        }
+        return n;
+      }));
     } else {
       const newNote: Note = {
-        ...noteToSave,
+        ...rest,
         id: crypto.randomUUID(),
+        content: { [language]: noteContent },
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -107,22 +146,29 @@ export default function Home() {
     setEditingNote(null);
   };
 
+  const handleUpdateNote = (updatedNote: Note) => {
+    setNotes(notes.map(n => n.id === updatedNote.id ? updatedNote : n));
+  };
+  
   const handleTogglePin = (id: string) => {
     setNotes(notes.map(note => note.id === id ? { ...note, isPinned: !note.isPinned } : note));
   };
 
   const sortedAndFilteredNotes = useMemo(() => {
-    const filtered = notes.filter(note =>
-      note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      note.body.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filtered = notes.filter(note => {
+      const currentContent = note.content[language];
+      if (!currentContent) return false;
+
+      return currentContent.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+             currentContent.body.toLowerCase().includes(searchQuery.toLowerCase());
+    });
 
     return filtered.sort((a, b) => {
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
       return b.updatedAt.getTime() - a.updatedAt.getTime();
     });
-  }, [notes, searchQuery]);
+  }, [notes, searchQuery, language]);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -132,6 +178,8 @@ export default function Home() {
         onCreateNew={handleCreateNewNote}
         viewMode={viewMode}
         onViewModeChange={handleViewModeChange}
+        language={language}
+        onLanguageChange={handleLanguageChange}
       />
       <main className="flex-grow p-4 sm:p-6 md:p-8">
         {sortedAndFilteredNotes.length > 0 ? (
@@ -156,7 +204,9 @@ export default function Home() {
                     onEdit={handleEditNote}
                     onDelete={handleDeleteNote}
                     onTogglePin={handleTogglePin}
+                    onUpdateNote={handleUpdateNote}
                     viewMode={viewMode}
+                    currentLanguage={language}
                   />
                 </motion.div>
               ))}
@@ -179,6 +229,7 @@ export default function Home() {
         onOpenChange={setIsEditorOpen}
         note={editingNote}
         onSave={handleSaveNote}
+        currentLanguage={language}
       />
 
       <div className="fixed bottom-8 right-8 z-20">

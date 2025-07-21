@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 // Define the SpeechRecognition interface for environments where it might not be present
 interface CustomSpeechRecognition extends EventTarget {
@@ -18,6 +18,7 @@ interface CustomSpeechRecognition extends EventTarget {
 export const useSpeechRecognition = (onTranscriptChange: (transcript: string) => void) => {
   const [isListening, setIsListening] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lang, setLang] = useState('gu-IN');
   const recognitionRef = useRef<CustomSpeechRecognition | null>(null);
 
   useEffect(() => {
@@ -33,7 +34,7 @@ export const useSpeechRecognition = (onTranscriptChange: (transcript: string) =>
     const recognitionInstance = new SpeechRecognition() as CustomSpeechRecognition;
     recognitionInstance.continuous = true;
     recognitionInstance.interimResults = true;
-    recognitionInstance.lang = 'gu-IN'; // Set to Gujarati
+    recognitionInstance.lang = lang;
 
     recognitionInstance.onresult = (event) => {
       let interimTranscript = '';
@@ -64,11 +65,14 @@ export const useSpeechRecognition = (onTranscriptChange: (transcript: string) =>
     return () => {
       recognitionRef.current?.stop();
     };
-  }, [onTranscriptChange]);
+  }, [onTranscriptChange, lang]);
 
   const startListening = () => {
     if (recognitionRef.current && !isListening) {
       try {
+        if(recognitionRef.current.lang !== lang) {
+          recognitionRef.current.lang = lang;
+        }
         recognitionRef.current.start();
         setIsListening(true);
         setError(null);
@@ -85,5 +89,13 @@ export const useSpeechRecognition = (onTranscriptChange: (transcript: string) =>
     }
   };
 
-  return { isListening, error, startListening, stopListening, hasRecognitionSupport: !!recognitionRef.current };
+  const setLanguage = useCallback((language: string) => {
+    setLang(language);
+    if (recognitionRef.current) {
+        recognitionRef.current.lang = language;
+    }
+  }, []);
+
+
+  return { isListening, error, startListening, stopListening, setLanguage, hasRecognitionSupport: !!recognitionRef.current };
 };

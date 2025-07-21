@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Mic, MicOff, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { Note } from '@/lib/types';
+import type { Note, Language } from '@/lib/types';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
@@ -29,11 +29,12 @@ interface NoteEditorProps {
   onOpenChange: (isOpen: boolean) => void;
   note: Note | null;
   onSave: (note: NoteFormData & { id?: string }) => void;
+  currentLanguage: Language;
 }
 
 const colorPalette = ['#F0F8F0', '#B2E4A8', '#A8B778', '#F3E5AB', '#FFDDC1', '#FFC0CB', '#C1D1FF', '#B2F7E8'];
 
-export function NoteEditor({ isOpen, onOpenChange, note, onSave }: NoteEditorProps) {
+export function NoteEditor({ isOpen, onOpenChange, note, onSave, currentLanguage }: NoteEditorProps) {
   const { toast } = useToast();
   const form = useForm<NoteFormData>({
     resolver: zodResolver(noteSchema),
@@ -45,15 +46,26 @@ export function NoteEditor({ isOpen, onOpenChange, note, onSave }: NoteEditorPro
     },
   });
 
+  const languageToLocale: Record<Language, string> = {
+    en: 'en-US',
+    gu: 'gu-IN',
+    hi: 'hi-IN',
+  };
+
   const {
     isListening,
     startListening,
     stopListening,
     error: speechError,
+    setLanguage,
     hasRecognitionSupport
   } = useSpeechRecognition((transcript) => {
     form.setValue('body', form.getValues('body') + transcript, { shouldValidate: true });
   });
+
+  useEffect(() => {
+    setLanguage(languageToLocale[currentLanguage]);
+  }, [currentLanguage, setLanguage]);
 
   useEffect(() => {
     if (speechError) {
@@ -67,12 +79,16 @@ export function NoteEditor({ isOpen, onOpenChange, note, onSave }: NoteEditorPro
 
   useEffect(() => {
     if (isOpen) {
-      const defaultValues = note
-        ? { title: note.title, body: note.body, color: note.color, isPinned: note.isPinned }
-        : { title: '', body: '', color: colorPalette[0], isPinned: false };
+      const currentNoteContent = note?.content?.[currentLanguage];
+      const defaultValues = {
+        title: note && currentNoteContent ? currentNoteContent.title : '',
+        body: note && currentNoteContent ? currentNoteContent.body : '',
+        color: note ? note.color : colorPalette[0],
+        isPinned: note ? note.isPinned : false,
+      };
       form.reset(defaultValues);
     }
-  }, [isOpen, note, form]);
+  }, [isOpen, note, form, currentLanguage]);
 
   const handleMicClick = () => {
     if (isListening) {
